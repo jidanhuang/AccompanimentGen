@@ -1,0 +1,101 @@
+# dirname to find data
+train_name: "whisper"
+train_id: "1"
+train_name: "decode_getefusion"
+model_name: "base"
+corpus_name: "jsut_ver1.1"
+d_model: 512  #注意力嵌入
+patch_dim: 256 #detr的嵌入长度
+
+path:
+  download: "./downloads/jsut_ver1.1"
+  raw: "data/1117"
+  preprocessed: "data/processed_1117/"
+  log: "./log"
+  checkpoint: "./checkpoint"  # dir to save model
+  audio_features_dir: "./vision_features"
+
+data:
+  audio_sampling_rate: 16000 #好像没用
+  audio_max_length: 480000
+  lang: zh
+  frontend: None  #(raw text), pyopenjtalk_kana (kana)
+  text_max_length: 120
+  train_ratio: 0.9
+  val_ratio: 0.1
+  timestamps: False
+  task: "transcribe"
+  img_type: "detr" #"detr","clip","resnet"
+
+train:
+  batch_size: 8
+  seed: 3407
+  learning_rate: 0.00001
+  weight_decay: 0.01
+  adam_epsilon: 0.00000001
+  warmup_steps: 2
+  num_worker: 10
+  num_train_epochs: 6
+  gradient_accumulation_steps: 1
+#To evaluate the model, the code runs the  function, which takes in the  and the validation  dataset, and performs image-text matching on the retrieval dataset. For this evaluation, the function computes several retrieval metrics, including recall at 1, 5, and 10 for both text-to-image and image-to-text retrieval. These metrics indicate how often the correct image or text was selected in the top 1, 5, or 10 retrieved items. The function returns a dictionary with the computed recall values for both directions of the retrieval task.validate_itm_matchingmodelval_ds
+inference:
+  epoch_index: 3
+  temperature: 1.
+  top_p:
+  task: transcribe
+  patience: 1.
+  beam_size: 5
+#epoch_id=3
+#original:CER: 0.1368865205849926
+#WER: 0.17892798270763982
+# multimodal:CER: 0.13013454017709988
+# WER: 0.1711477034385884
+
+#epoch_id=2
+#mulitmodal_whisper change decode
+#CER: 0.131929053280124
+#WER: 0.17181717305829758
+#original_whisper change decode
+# CER: 0.13463613336217478
+# WER: 0.17545636180543528
+
+#epoch_id=1
+#original
+#CER: 0.14549310957075293
+#WER: 0.18827009050267146
+#multimodal
+#CER: 0.13398097806285922
+# WER: 0.17519739331781126
+#-v :multi;original
+#pad or unpad: 1.dataset __getitem__->convert_ogg_to_mel(去掉pad_or_trim);collate2.无论是否pad，audio_encode的位置嵌入都改成了x = (x + sinusoids(x.shape[-2], 512).to('cuda')).to(x.dtype)
+#remove 30s: load_val_list里读取的路径是否添加"deleted_list"
+#目前似乎test使用unpad会造成tokens=[]问题,暂不清楚是test身数据集的问题还是unpad问题
+# nohup python -u inference_multimodal_val_unpad_remove_30s.py > inference_multimodal_val_unpad_remove_30s.log 2>&1 &
+# [1] 817619
+#nohup python -u train_multimodal.py > train_multimodal.log 2>&1 & 2698415
+#nohup python -u train_original.py > train_original.log 2>&1 & 2863491 1525741
+#nohup python -u inference_original.py > inference_original_2.log 2>&1 & 937793
+#nohup python -u inference_original.py 1 > inference_original_1.log 2>&1 & 938139
+#nohup python -u inference_multimodal.py > inference_multimodal_0.log 2>&1 & 4145817
+#nohup python -u data_narrative/clip/save_image_features.py > save_image_features.log 2>&1 &  2104169 680916
+#nohup python -u data_narrative/data_list/delete_30s.py > data_narrative/data_list/delete_30s.log 2>&1 &  1557574 1138571
+#nohup python -u test.py > test.log 2>&1 & #[1] 4149331,4150500,[1] 55443,56863
+#nohup python -u test.py > test.log 2>&1 & #[1] 4149331,4150500,[1] 55443,56863
+#nohup python -u train.py > train.log 2>&1 & 
+#nohup python -u train.py >/dev/null 2>&1 &
+#[1] 650167 original
+#./train.py &
+#kill -9 650167
+#killall [程序名]
+#[1] 172739 multimodal
+#[1] 295612
+
+
+#multi
+#epoch_id=3; CER: 0.07743128446653687 WER: 0.11226879759346615
+#epoch_id=2; CER: 0.076052079141151   wER: 0.11066167996371504
+#epoch_id=1;CER: 0.07611125009517387  WER: 0.11142115723091402
+#original
+#epoch_id=3  CER: 0.07724506999358256 WER: 0.11171007725424006
+#epoch_id=2  CER: 0.07534724865940808 WER: 0.10920327116949939
+#epoch_id=1  CER: 0.07430762369883724 WER: 0.10744000926243605
